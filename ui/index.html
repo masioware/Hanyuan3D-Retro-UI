@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hunyuan3D Studio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script type="module" src="https://cdn.jsdelivr.net/npm/@google/model-viewer@3.1.1/dist/model-viewer.min.js"></script>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="app">
+
+  <!-- Topbar -->
+  <header class="topbar">
+    <div class="brand">
+      <svg class="brand-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="12 2 2 7 12 12 22 7"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+      <span class="brand-name">Hunyuan3D</span>
+      <span class="brand-tag">2.0</span>
+    </div>
+    <div class="server-row">
+      <span class="server-label">API</span>
+      <input id="serverUrl" type="text" value="http://localhost:8000" spellcheck="false" class="server-input">
+      <div class="status-pill">
+        <span class="status-dot" id="statusDot"></span>
+        <span id="statusText">—</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Workspace -->
+  <main class="workspace">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-scroll">
+
+        <!-- Source -->
+        <section class="section">
+          <div class="section-head">
+            <span class="section-title">Source</span>
+            <div class="pill-tabs" id="sourceSwitch">
+              <button class="pill-tab active" data-tab="tab-image">Image</button>
+              <button class="pill-tab" data-tab="tab-text">Text</button>
+            </div>
+          </div>
+
+          <div class="tab-content active" id="tab-image">
+            <div class="dropzone" id="uploadZone">
+              <input type="file" id="fileInput" accept="image/*">
+              <div class="dropzone-empty" id="uploadEmpty">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" opacity=".4"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                <p>Drop image or click to browse</p>
+                <small>PNG · JPG · WEBP · RGBA</small>
+              </div>
+              <img id="imgPreview" class="img-preview" src="" alt="" style="display:none;">
+            </div>
+            <button id="btnClearImg" class="btn-ghost-sm" style="display:none;">✕ Remove image</button>
+          </div>
+
+          <div class="tab-content" id="tab-text">
+            <textarea id="textInput" class="textarea" rows="4" placeholder="A 3D model of a ceramic teapot, white background, studio lighting…"></textarea>
+            <p class="warn-note">⚠ Requires <code>--enable_t23d</code> on server</p>
+          </div>
+        </section>
+
+        <!-- Generation mode -->
+        <section class="section">
+          <div class="section-head">
+            <span class="section-title">Generation</span>
+            <span class="section-sub" id="genModeDesc">Recommended</span>
+          </div>
+          <div class="radio-group" id="genModeGroup">
+            <label class="radio-card active" data-gen="Turbo">
+              <span class="radio-ring"></span>
+              <span class="radio-name">Turbo</span>
+              <span class="radio-meta">5 steps</span>
+            </label>
+            <label class="radio-card" data-gen="Fast">
+              <span class="radio-ring"></span>
+              <span class="radio-name">Fast</span>
+              <span class="radio-meta">10 steps</span>
+            </label>
+            <label class="radio-card" data-gen="Standard">
+              <span class="radio-ring"></span>
+              <span class="radio-name">Standard</span>
+              <span class="radio-meta">20 steps</span>
+            </label>
+          </div>
+        </section>
+
+        <!-- Mesh quality -->
+        <section class="section">
+          <div class="section-head">
+            <span class="section-title">Mesh Quality</span>
+            <span class="section-sub" id="decodeModeDesc">Balanced</span>
+          </div>
+          <div class="radio-group" id="decodeModeGroup">
+            <label class="radio-card" data-decode="Low">
+              <span class="radio-ring"></span>
+              <span class="radio-name">Low</span>
+              <span class="radio-meta">196 res</span>
+            </label>
+            <label class="radio-card active" data-decode="Standard">
+              <span class="radio-ring"></span>
+              <span class="radio-name">Standard</span>
+              <span class="radio-meta">256 res</span>
+            </label>
+            <label class="radio-card" data-decode="High">
+              <span class="radio-ring"></span>
+              <span class="radio-name">High</span>
+              <span class="radio-meta">384 res</span>
+            </label>
+          </div>
+        </section>
+
+        <!-- Parameters -->
+        <section class="section collapsible" id="sectionParams">
+          <div class="section-head toggleable" id="toggleParams">
+            <span class="section-title">Parameters</span>
+            <span class="chevron">›</span>
+          </div>
+          <div class="section-body" id="bodyParams">
+            <div class="param-row">
+              <label class="param-label">Guidance Scale</label>
+              <span class="param-val" id="valCfg">5.0</span>
+            </div>
+            <input type="range" class="slider" id="sliderCfg" min="1" max="20" value="5" step="0.5">
+
+            <div class="param-row">
+              <label class="param-label">Num Chunks</label>
+              <span class="param-val" id="valChunks">20,000</span>
+            </div>
+            <input type="range" class="slider" id="sliderChunks" min="1000" max="200000" value="20000" step="1000">
+
+            <div class="rule"></div>
+
+            <div class="param-row">
+              <label class="param-label">Seed</label>
+              <input type="number" id="numSeed" class="num-input" value="1234" min="0" max="10000000">
+            </div>
+            <input type="range" class="slider" id="sliderSeed" min="0" max="10000000" value="1234" step="1">
+
+            <label class="check-row">
+              <input type="checkbox" id="cbRandomSeed" checked>
+              <span>Randomize seed</span>
+            </label>
+          </div>
+        </section>
+
+        <!-- Export -->
+        <section class="section collapsible" id="sectionExport">
+          <div class="section-head toggleable" id="toggleExport">
+            <span class="section-title">Export</span>
+            <span class="chevron">›</span>
+          </div>
+          <div class="section-body" id="bodyExport">
+            <div class="param-row">
+              <label class="param-label">Format</label>
+              <select id="selType" class="select">
+                <option value="glb">GLB</option>
+                <option value="obj">OBJ</option>
+                <option value="ply">PLY</option>
+                <option value="stl">STL</option>
+              </select>
+            </div>
+
+            <label class="check-row">
+              <input type="checkbox" id="cbSimplify">
+              <span>Simplify mesh</span>
+            </label>
+
+            <div id="rowFaceNum" style="display:none;">
+              <div class="param-row">
+                <label class="param-label">Target Faces</label>
+                <span class="param-val" id="valFace">40,000</span>
+              </div>
+              <input type="range" class="slider" id="sliderFace" min="100" max="500000" value="40000" step="100">
+            </div>
+
+            <label class="check-row" id="rowTexture" style="display:none;">
+              <input type="checkbox" id="cbTexture">
+              <span>Include texture</span>
+            </label>
+
+            <div class="dual-btn">
+              <button class="btn btn-ghost" id="btnTransform" disabled>Transform</button>
+              <button class="btn btn-ghost" id="btnDownload" disabled>Download</button>
+            </div>
+          </div>
+
+      </div><!-- /sidebar-scroll -->
+
+      <!-- Generate bar -->
+      <div class="gen-bar">
+        <div class="progress-block" id="progressWrap">
+          <div class="progress-meta">
+            <span id="progressLabel">Processing</span>
+            <span id="progressText" class="progress-elapsed"></span>
+          </div>
+          <div class="progress-track"><div class="progress-fill"></div></div>
+        </div>
+        <div class="alert-box" id="alertBox"></div>
+        <div class="gen-actions">
+          <button class="btn btn-primary" id="btnShape">
+            <span class="spinner"></span>
+            Generate Shape
+          </button>
+          <button class="btn btn-secondary" id="btnTextured">
+            <span class="spinner"></span>
+            + Texture
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Viewer -->
+    <div class="viewer">
+      <nav class="viewer-nav">
+        <button class="vnav active" data-slot="slot-gen">Generated</button>
+        <button class="vnav" data-slot="slot-export">Exported</button>
+        <button class="vnav" data-slot="slot-log">Log</button>
+        <div class="vnav-gap"></div>
+        <button class="ambient-btn" id="btnKeyLight">
+          <span class="ambient-dot" id="keyDot"></span>
+          <span id="keyLabel">Key light off</span>
+        </button>
+
+      </nav>
+
+      <div class="viewer-body">
+
+        <!-- Generated -->
+        <div class="vslot active" id="slot-gen">
+          <div class="empty-state" id="ph-gen">
+            <div class="empty-icon">◻</div>
+            <p>No mesh generated yet</p>
+            <small>Upload an image and click <strong>Generate Shape</strong></small>
+          </div>
+          <model-viewer id="mv-gen"
+            auto-rotate camera-controls
+            shadow-intensity="1" exposure="0.9" tone-mapping="commerce"
+            style="display:none; width:100%; height:100%;">
+          </model-viewer>
+        </div>
+
+        <!-- Exported -->
+        <div class="vslot" id="slot-export">
+          <div class="empty-state" id="ph-export">
+            <div class="empty-icon">◻</div>
+            <p>No export loaded</p>
+            <small>Use Export settings and click <strong>Transform</strong></small>
+          </div>
+          <div class="load-prompt" id="lp-export" style="display:none;">
+            <p>Export mesh ready</p>
+            <button class="btn btn-primary" id="btnLoadExport">Load in viewer</button>
+          </div>
+          <model-viewer id="mv-export"
+            auto-rotate camera-controls
+            shadow-intensity="1" exposure="0.9" tone-mapping="commerce"
+            style="display:none; width:100%; height:100%;">
+          </model-viewer>
+        </div>
+
+        <!-- Log -->
+        <div class="vslot" id="slot-log">
+          <div class="log-panel" id="statsDisplay">
+            <span class="log-empty">Awaiting job…</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+</div>
+<script src="app.js"></script>
+</body>
+</html>
