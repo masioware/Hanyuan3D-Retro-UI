@@ -2,8 +2,6 @@
 
 A local Docker setup and web UI for running [Tencent's Hunyuan3D-2](https://github.com/Tencent/Hunyuan3D-2) as a self-hosted API + 3D generation studio.
 
-![Hunyuan3D Studio UI](assets/example_images/example_000.png)
-
 ## Overview
 
 This project packages Hunyuan3D-2 into a ready-to-run Docker container and pairs it with a browser-based studio where you can:
@@ -20,11 +18,7 @@ This project packages Hunyuan3D-2 into a ready-to-run Docker container and pairs
 ## 🎥 Live Demo
 
 <p align="center">
-  <img src="assets/demo.gif" width="800" alt="FaceID Demo"/>
-</p>
-
-<p align="center">
-Real-time face detection and recognition streaming from the browser.
+  <img src="assets/demo.gif" width="800" alt="UI Demo"/>
 </p>
 
 
